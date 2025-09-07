@@ -28,7 +28,7 @@ It combines the power of packet capture, firewall management, and live analytics
 ## 🔧 Installation
 ```bash
 # Clone repo
-git clone https://github.com/YOUR_USERNAME/MadScan.git
+git clone https://github.com/Moriggan/MadScan-IPS.git
 cd MadScan
 
 # Install dependencies
