@@ -1,1 +1,1 @@
-# MadScan-IPS
+# MadScan
