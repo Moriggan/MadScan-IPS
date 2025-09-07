@@ -1,10 +1,6 @@
 ⚡ MadScan
 > Advanced Network Packet Scanner & Analyzer with Web Dashboard
 
-![MadScan Dashboard](assets/demo.png)
-
----
-
 ## 🚀 Overview
 **MadScan** is a modern packet sniffer and scanner with a **real-time web dashboard**, designed for security analysts, network engineers, and curious developers.  
 It combines the power of packet capture, firewall management, and live analytics — all in one beautiful interface.  
