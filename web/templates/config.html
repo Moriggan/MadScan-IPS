@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+  <h2>Configuration</h2>
+
+  <div class="card">
+    <form method="post" class="form">
+      <div class="form-group">
+        <label>Firewall backend</label>
+        <select name="firewall_backend">
+          <option value="auto" {% if cfg.firewall_backend=='auto' %}selected{% endif %}>Auto</option>
+          <option value="iptables" {% if cfg.firewall_backend=='iptables' %}selected{% endif %}>iptables</option>
+          <option value="windows" {% if cfg.firewall_backend=='windows' %}selected{% endif %}>Windows</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Max accepted connections</label>
+        <input type="number" name="max_connections" value="{{ cfg.max_connections }}" min="100" max="300">
+        <div class="helper">Used for UI limits and rule generation.</div>
+      </div>
+
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-primary" type="submit">Save</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card" style="margin-top:12px;">
+    <h3>Firewall rules</h3>
+    <div id="rules">
+      {% for r in rules %}
+        <div class="packet-card">{{ r.app_path }} — max_conn: {{ r.max_connections }} — action: {{ r.action }}</div>
+      {% else %}
+        <div class="helper">No firewall rules configured.</div>
+      {% endfor %}
+    </div>
+
+    <h4 style="margin-top:10px">Add rule (admin only)</h4>
+    <form id="fw-form">
+      <div class="form-group">
+        <label>App path</label>
+        <input name="app_path" placeholder="/usr/bin/myapp or C:\Program Files\MyApp\app.exe">
+      </div>
+      <div class="form-group">
+        <label>Max connections</label>
+        <input name="max_connections" type="number" value="200" min="1" max="10000">
+      </div>
+      <div class="form-group">
+        <label>Action</label>
+        <select name="action">
+          <option value="limit">Limit</option>
+          <option value="block">Block</option>
+        </select>
+      </div>
+      <div class="row"><button class="btn" type="button" id="add-fw">Add Rule</button></div>
+    </form>
+
+    <div class="helper" style="margin-top:8px">Rules are stored and UI will generate suggested iptables/netsh commands for you; applying them requires admin privileges on the host and is intentionally not performed automatically.</div>
+  </div>
+
+  <div class="card" style="margin-top:12px;">
+    <h3>Thresholds (suspicious)</h3>
+    <form id="threshold-form">
+      <div class="form-group">
+        <label>Large packet threshold (bytes)</label>
+        <input name="large_packet_bytes" type="number" value="{{ thresholds.large_packet_bytes }}">
+      </div>
+      <div class="form-group">
+        <label>Connections per minute (per IP)</label>
+        <input name="conn_per_min" type="number" value="{{ thresholds.conn_per_min }}">
+      </div>
+      <div class="form-group">
+        <label>Connections per second (per IP)</label>
+        <input name="conn_per_sec" type="number" value="{{ thresholds.conn_per_sec }}">
+      </div>
+      <div class="row"><button class="btn" type="button" id="save-thr">Save thresholds</button></div>
+    </form>
+  </div>
+
+</div>
+
+<script>
+document.getElementById('add-fw').addEventListener('click', async () => {
+  const form = document.getElementById('fw-form');
+  const data = new FormData(form);
+  const body = {};
+  data.forEach((v,k)=> body[k]=v);
+  const r = await fetch('/api/firewall/rules', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  const j = await r.json();
+  if (j.ok) location.reload(); else alert(j.error || 'failed');
+});
+
+document.getElementById('save-thr').addEventListener('click', async () => {
+  const form = document.getElementById('threshold-form');
+  const data = new FormData(form);
+  const body = {};
+  data.forEach((v,k)=> body[k]=v);
+  const r = await fetch('/api/thresholds', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  const j = await r.json();
+  if (j.error) alert(j.error || 'failed'); else { alert('Saved'); location.reload(); }
+});
+</script>
+{% endblock %}

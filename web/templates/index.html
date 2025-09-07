@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+  <div class="card">
+    <h1>Dashboard</h1>
+    <div class="stats">
+      <div class="stat"><div class="label">Total Packets</div><div class="value">{{ stats.total_packets }}</div></div>
+      <div class="stat"><div class="label">Scan Runs</div><div class="value">{{ stats.scan_runs }}</div></div>
+      <div class="stat"><div class="label">Suspicious</div><div class="value">{{ stats.malicious }}</div></div>
+    </div>
+
+    <div style="margin-top:12px;">
+      <h3>Recent captures</h3>
+      <ul>
+        {% for h in stats.history[:10] %}
+          <li>{{ h.time }} — {{ h.file }} — {{ h.packets }} pkts - <a href="{{ url_for('results') }}?file={{ h.file }}">Open</a></li>
+        {% else %}
+          <li class="helper">No captures yet</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,12 @@
+flask
+scapy
+pillow 
+pystray
+werkzeug
+psutil
+flask-socketio
+eventlet
+schedule
+reportlab
+openpyxl
+python-docx

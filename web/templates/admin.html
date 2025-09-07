@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+  <h2>Admin</h2>
+
+  <div class="grid-2">
+    <div class="card">
+      <h3>Users</h3>
+      <table class="table table-striped">
+        <thead><tr><th>ID</th><th>User</th><th>Role</th><th>Active</th><th>Created</th><th>Actions</th></tr></thead>
+        <tbody>
+          {% for u in users %}
+            <tr>
+              <td>{{ u.id }}</td>
+              <td>{{ u.username }}</td>
+              <td>{{ u.role }}</td>
+              <td>{{ u.active }}</td>
+              <td>{{ u.created_at }}</td>
+              <td>
+                <form method="post" style="display:inline">
+                  <input type="hidden" name="user_id" value="{{ u.id }}">
+                  <input type="hidden" name="action" value="role">
+                  <select name="role"><option value="user" {% if u.role=='user' %}selected{% endif %}>user</option><option value="admin" {% if u.role=='admin' %}selected{% endif %}>admin</option></select>
+                  <button class="btn" type="submit">Set</button>
+                </form>
+                <form method="post" style="display:inline">
+                  <input type="hidden" name="user_id" value="{{ u.id }}">
+                  <input type="hidden" name="action" value="toggle">
+                  <button class="btn btn-danger" type="submit">{{ 'Disable' if u.active else 'Enable' }}</button>
+                </form>
+                <form method="post" style="display:inline">
+                  <input type="hidden" name="user_id" value="{{ u.id }}">
+                  <input type="hidden" name="action" value="resetpw">
+                  <button class="btn" type="submit">Reset PW</button>
+                </form>
+                <form method="post" style="display:inline" onsubmit="return confirm('Delete user?')">
+                  <input type="hidden" name="user_id" value="{{ u.id }}">
+                  <input type="hidden" name="action" value="delete">
+                  <button class="btn btn-danger" type="submit">Delete</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3>Stats</h3>
+      <div class="stat"><div class="label">Total Packets</div><div class="value">{{ stats.total_packets }}</div></div>
+      <div class="stat"><div class="label">Scan Runs</div><div class="value">{{ stats.scan_runs }}</div></div>
+      <div class="stat"><div class="label">Suspicious</div><div class="value">{{ stats.malicious }}</div></div>
+
+      <h3 style="margin-top:12px;">Live connections (top recent)</h3>
+      <div style="max-height:220px;overflow:auto;">
+        <ul>
+          {% for c in live_connections %}
+            <li>{{ c.src }} — {{ c.count }}</li>
+          {% else %}
+            <li class="helper">No connections captured yet</li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <h3 style="margin-top:12px;">Tools</h3>
+      <div style="display:flex;gap:8px;">
+        <button id="reset-job" class="btn">Reset Job</button>
+        <button id="purge" class="btn btn-danger">Purge PCAPs</button>
+        <button id="export" class="btn">Export Logs</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById('reset-job').addEventListener('click', async () => {
+  if (!confirm('Reset/kill any running job?')) return;
+  const r = await fetch('/api/scan/reset', { method: 'POST' });
+  const j = await r.json();
+  if (j.ok) alert('Job reset'); else alert('Failed');
+});
+document.getElementById('purge').addEventListener('click', async () => {
+  if (!confirm('Purge all PCAPs?')) return;
+  const r = await fetch('/admin/purge_pcaps', { method: 'POST' });
+  const j = await r.json();
+  alert('Removed: ' + (j.removed||0));
+});
+document.getElementById('export').addEventListener('click', () => {
+  location.href = '/admin/export_logs';
+});
+</script>
+{% endblock %}

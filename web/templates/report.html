@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+  <h1>Report</h1>
+  <form method="post">
+    <label for="capture_file">Capture (full path):</label>
+    <input name="capture_file" id="capture_file" placeholder="/full/path/to/capture.pcap">
+
+    <label for="format">Format</label>
+    <select name="format" id="format">
+      <option value="txt">TXT</option>
+    </select>
+
+    <button type="submit" class="btn btn-primary">Generate Report</button>
+  </form>
+
+  <h2 style="margin-top:18px">Stats Snapshot</h2>
+  <pre>{{ stats | tojson(indent=2) }}</pre>
+</div>
+{% endblock %}

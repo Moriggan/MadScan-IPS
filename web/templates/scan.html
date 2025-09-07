@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+  <div class="card">
+    <h2>Scan</h2>
+    {% if not scapy_ok %}
+      <div class="alert danger">Scapy not available. Scanning disabled on this host.</div>
+    {% endif %}
+
+    <div class="form-group">
+      <label>Interface</label>
+      <select id="iface">
+        <option value="">Default</option>
+        {% for i in ifaces %}
+          <option value="{{ i }}" {% if last_scan and last_scan.iface==i %}selected{% endif %}>{{ i }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Duration</label>
+      <select id="duration">
+        {% for v,label in durations %}
+          <option value="{{ v }}" {% if last_scan and last_scan.duration==v|int %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="row">
+      <button id="start" class="btn btn-primary">Start Scan</button>
+      <button id="kill" class="btn btn-danger">Kill / Reset</button>
+    </div>
+
+    <div class="mt-12">
+      <div class="progress"><div id="bar" class="bar" style="width:0%"></div></div>
+      <div style="margin-top:8px">Captured: <span id="cap">0</span> — Status: <span id="status">{{ job.status }}</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const socket = (typeof io !== 'undefined') ? io() : null;
+if (socket) {
+  socket.on('scan_progress', d => {
+    document.getElementById('bar').style.width = (d.progress || 0) + '%';
+    document.getElementById('cap').textContent = d.captured || 0;
+  });
+  socket.on('scan_complete', d => {
+    document.getElementById('status').textContent = d.status;
+    if (d.status === 'done' && d.pcap_path) {
+      setTimeout(() => { location.href = '{{ url_for("results") }}?file=' + encodeURIComponent(d.pcap_path); }, 600);
+    }
+  });
+}
+
+document.getElementById('start').addEventListener('click', async () => {
+  const iface = document.getElementById('iface').value;
+  const duration = document.getElementById('duration').value;
+  const res = await fetch('{{ url_for("api_scan_start") }}', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ interface: iface, duration: duration })
+  });
+  const j = await res.json();
+  if (!j.ok) alert(j.error || 'Failed to start');
+});
+
+document.getElementById('kill').addEventListener('click', async () => {
+  if (!confirm('Kill the running scan?')) return;
+  await fetch('{{ url_for("api_scan_reset") }}', { method: 'POST' });
+  document.getElementById('bar').style.width = '0%';
+  document.getElementById('cap').textContent = '0';
+  document.getElementById('status').textContent = 'idle';
+});
+</script>
+{% endblock %}

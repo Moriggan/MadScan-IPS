@@ -1,0 +1,10 @@
+{
+  "max_connections": 200,
+  "firewall_backend": "auto",
+  "allow_registration": true,
+  "last_scan": {
+    "iface": "",
+    "duration": 5,
+    "filter": ""
+  }
+}

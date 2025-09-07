@@ -1,0 +1,21 @@
+{
+  "total_packets": 7,
+  "malicious": 0,
+  "scan_runs": 1,
+  "max_packets_in_run": 7,
+  "history": [
+    {
+      "time": "20250907-173739",
+      "duration": 5,
+      "iface": "default",
+      "packets": 7,
+      "file": "scan-20250907-173739.pcap"
+    }
+  ],
+  "connections": [
+    {
+      "src": "02:50:72:42:16:c8",
+      "count": 7
+    }
+  ]
+}

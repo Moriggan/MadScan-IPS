@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MadScan</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% if session.get('user_id') and session.get('role') %}
+    <!-- socket.io (optional) -->
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  {% endif %}
+</head>
+<body>
+<header>
+  <nav class="navbar">
+    <div class="logo">MadScan</div>
+    <ul class="nav-links">
+      <li><a href="{{ url_for('index') }}">Home</a></li>
+      <li><a href="{{ url_for('scan') }}">Scan</a></li>
+      <li><a href="{{ url_for('results') }}">Results</a></li>
+      <li><a href="{{ url_for('config') }}">Config</a></li>
+      {% if session.get('role') == 'admin' %}
+        <li><a href="{{ url_for('admin') }}">Admin</a></li>
+      {% endif %}
+      {% if session.get('user_id') %}
+        <li><a href="{{ url_for('logout') }}">Logout ({{ session.get('username') }})</a></li>
+      {% else %}
+        <li><a href="{{ url_for('login') }}">Login</a></li>
+      {% endif %}
+    </ul>
+  </nav>
+</header>
+
+<main>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="container" style="margin-top:12px;">
+        {% for cat, msg in messages %}
+          <div class="alert {{ cat }}">{{ msg }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+
+<footer>
+  <p style="text-align:center;padding:16px;color:#9aa;">&copy; MadScan By Moriggan 2025</p>
+</footer>
+</body>
+</html>

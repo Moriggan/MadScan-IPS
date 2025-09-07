@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+  <h2>Admin — User Management</h2>
+  <p class="helper">Promote, demote, reset passwords, or delete users. Admin-only area.</p>
+
+  <table class="table table-hover">
+    <thead>
+      <tr><th>ID</th><th>Username</th><th>Role</th><th>Created</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+      <tr>
+        <td>{{ u.id }}</td>
+        <td>{{ u.username }}</td>
+        <td>{{ u.role }}</td>
+        <td>{{ u.created_at }}</td>
+        <td>
+          {% if u.role != 'admin' %}
+            <button class="btn btn-primary" onclick="promote({{ u.id }})">Promote</button>
+          {% else %}
+            <button class="btn" onclick="demote({{ u.id }})">Demote</button>
+          {% endif %}
+          <button class="btn" onclick="resetpw({{ u.id }})">Reset PW</button>
+          <button class="btn btn-danger" onclick="deleteUser({{ u.id }})">Delete</button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script>
+async function promote(id){
+  if(!confirm('Promote user to admin?')) return;
+  const r = await fetch('/admin/user/'+id+'/promote', { method:'POST' });
+  if(r.ok) location.reload(); else alert('Error');
+}
+async function demote(id){
+  if(!confirm('Demote user to normal?')) return;
+  const r = await fetch('/admin/user/'+id+'/demote', { method:'POST' });
+  if(r.ok) location.reload(); else alert('Error');
+}
+async function resetpw(id){
+  const pw = prompt('Enter new password for user ID ' + id);
+  if(!pw) return;
+  const r = await fetch('/admin/user/'+id+'/resetpw', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({password: pw})});
+  if(r.ok) alert('Password reset'); else alert('Error');
+}
+async function deleteUser(id){
+  if(!confirm('Delete user ID '+id+'? This cannot be undone.')) return;
+  const r = await fetch('/admin/user/'+id+'/delete', { method:'POST' });
+  if(r.ok) location.reload(); else alert('Error');
+}
+</script>
+{% endblock %}
