@@ -42,7 +42,7 @@ Then open: http://127.0.0.1:5000
 Username: admin
 
 Password: admin
-
+```
 ⚠️ Change the default credentials immediately after first login!
 
 🛡 Security
